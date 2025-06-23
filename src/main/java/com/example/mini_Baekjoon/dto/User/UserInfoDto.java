@@ -1,12 +1,20 @@
 package com.example.mini_Baekjoon.dto.User;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
-@Getter
-@AllArgsConstructor
+import java.time.LocalDateTime;
+
+
+@Getter @Setter
 public class UserInfoDto {
     private String userId;
     private String username;
-    private String createdAt;
+    private LocalDateTime createdAt;
+
+    public UserInfoDto(String userId, String username, LocalDateTime createdAt) {
+        this.userId = userId;
+        this.username = username;
+        this.createdAt = createdAt;
+    }
 }

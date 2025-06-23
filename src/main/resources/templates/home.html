@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>홈페이지</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>코딩 테스트 플랫폼</h1>
+    <div class="menu-container" id="menuContainer">
+        <!-- 메뉴가 JS로 동적으로 바뀝니다 -->
+    </div>
+</div>
+<script>
+    // 로그인 상태에 따라 메뉴 변경
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('jwt');
+        const menuContainer = document.getElementById('menuContainer');
+        if (token) {
+            menuContainer.innerHTML = `
+                <a href="/mypage" class="menu-link">마이페이지</a>
+                <a href="#" id="logoutLink" class="menu-link">로그아웃</a>
+            `;
+            document.getElementById('logoutLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('jwt');
+                alert('로그아웃 되었습니다.');
+                window.location.href = '/';
+            });
+        } else {
+            menuContainer.innerHTML = `
+                <a href="/signup" class="menu-link">회원가입</a>
+                <a href="/login" class="menu-link">로그인</a>
+            `;
+        }
+    });
+</script>
+</body>
+</html>

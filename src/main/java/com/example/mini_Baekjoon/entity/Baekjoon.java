@@ -13,9 +13,16 @@ public class Baekjoon {
 
     private String title;
     private String description;
+
+    @Column(columnDefinition = "TEXT")
     private String answerCode;
+
+    @Column(columnDefinition = "TEXT")
     private String inputDescription;
+
+    @Column(columnDefinition = "TEXT")
     private String outputDescription;
+
     private String algorithmCategory;
 
     @Column(updatable = false)
