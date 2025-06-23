@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <!-- 홈으로 가는 버튼 추가 -->
+    <div style="text-align:right; margin-bottom: 10px;">
+        <a href="/" class="btn btn-home">홈으로</a>
+    </div>
+    <div class="user-info">
+        <h2>내 정보</h2>
+        <div id="userInfo"></div>
+    </div>
+
+    <h2>제출 기록</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>문제 제목</th>
+            <th>제출 시간</th>
+            <th>실행 시간</th>
+            <th>결과</th>
+        </tr>
+        </thead>
+        <tbody id="submissionTable">
+        <!-- 제출 기록이 동적으로 채워집니다 -->
+        </tbody>
+    </table>
+</div>
+<script src="/js/mypage.js"></script>
+</body>
+</html>
