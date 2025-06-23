@@ -1,0 +1,6 @@
+5
+180 70 Alice
+190 80 Bob
+180 75 Charlie
+180 70 David
+170 65 Eve
