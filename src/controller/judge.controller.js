@@ -5,6 +5,8 @@ import { promisify } from 'util';
 import path from 'path';
 import tmp from 'tmp';
 import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
+
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -15,13 +17,19 @@ export const scoreProblem = async (req, res) => {
 
   const { submissionId, userId, baekjoonId, language, sourceCode } = req.body;
 
+  let actual = '';
+  let start = 0, end = 0;
+  let restoredCode = '', cppFile = '', exeFile = '';
+
   try {
     const tcDir = path.join(__dirname, '..', 'testcases', String(baekjoonId));
-    const input = fs.readFileSync(path.join(tcDir, 'input1.txt'), 'utf-8').trim();
-    const expected = fs.readFileSync(path.join(tcDir, 'output1.txt'), 'utf-8').trim();
+    let input = fs.readFileSync(path.join(tcDir, 'input1.txt'), 'utf-8')
+      .replace(/\r\n/g, '\n').trim() + '\n';
+    const expected = fs.readFileSync(path.join(tcDir, 'output1.txt'), 'utf-8')
+      .replace(/\r\n/g, '\n').trim();
 
-    let actual = '';
-    let start = 0, end = 0;
+    console.log('[디버그] input 내용:', JSON.stringify(input));
+    console.log("예상 출력:", expected);
 
     if (language === 'python' || language === 'python3') {
       const tmpFile = tmp.fileSync({ postfix: '.py' });
@@ -35,12 +43,27 @@ export const scoreProblem = async (req, res) => {
 
     } else if (language === 'cpp') {
       const tmpDir = tmp.dirSync();
-      const cppFile = path.join(tmpDir.name, 'main.cpp');
-      const exeFile = path.join(tmpDir.name, 'main.out');
 
-      fs.writeFileSync(cppFile, sourceCode);
-      await execAsync(`g++ ${cppFile} -o ${exeFile}`);
+      restoredCode = sourceCode
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, '\\');
 
+      cppFile = path.join(tmpDir.name, 'main.cpp');
+      exeFile = path.join(tmpDir.name, 'main.out');
+
+      fs.writeFileSync(cppFile, restoredCode);
+      fs.writeFileSync(path.join(__dirname, 'debug_main.cpp'), restoredCode);
+      console.log('[디버그] 복원된 코드:\n', restoredCode);
+
+      // 컴파일
+      try {
+        await execAsync(`g++ ${cppFile} -o ${exeFile}`);
+      } catch (compileErr) {
+        throw new Error('컴파일 오류: ' + compileErr.stderr);
+      }
+
+      // 실행
       start = Date.now();
       const { stdout } = await execAsync(`${exeFile}`, { input, timeout: 3000 });
       end = Date.now();
@@ -51,23 +74,46 @@ export const scoreProblem = async (req, res) => {
       const javaFile = path.join(tmpDir.name, 'Main.java');
 
       fs.writeFileSync(javaFile, sourceCode);
-      await execAsync(`javac ${javaFile}`);
+      try {
+        await execAsync(`javac ${javaFile}`);
+      } catch (compileErr) {
+        throw new Error('Java 컴파일 오류: ' + compileErr.stderr);
+      }
 
       start = Date.now();
-      const { stdout } = await execAsync(`java -cp ${tmpDir.name} Main`, { input, timeout: 3000 });
-      end = Date.now();
-      actual = stdout.trim();
-    }
 
-    const isCorrect = actual === expected;
+  actual = await new Promise((resolve, reject) => {
+    const child = spawn('java', ['-cp', tmpDir.name, 'Main']);
+    let output = '';
+    let error = '';
+
+    child.stdout.on('data', data => output += data.toString());
+    child.stderr.on('data', data => error += data.toString());
+
+    child.on('error', reject);
+    child.on('close', code => {
+      if (code !== 0) {
+        return reject(new Error(`Java 프로세스 종료 코드 ${code}. stderr: ${error}`));
+      }
+      resolve(output.trim());
+    });
+
+    child.stdin.write(input);
+    child.stdin.end();
+  });
+
+  end = Date.now();
+}
+
+    // 결과 비교
+    const normalize = s => s.trim().replace(/\r\n/g, '\n');
+    const isCorrect = normalize(actual) === normalize(expected);
+
     const resultPayload = {
       result: isCorrect ? 'correct' : 'wrong',
       executionTime: (end - start) / 1000,
       language,
     };
-
-    // Spring 서버로 결과 전송 (주석 처리 해제 시 사용)
-    // await axios.patch(`http://localhost:8080/api/submissions/${submissionId}`, resultPayload);
 
     res.status(200).json({ message: '채점 완료', result: resultPayload });
 
