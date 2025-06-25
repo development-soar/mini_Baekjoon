@@ -28,11 +28,15 @@ public class SecurityConfig {
                                 "/api/users/signup",
                                 "/api/users/login",
                                 "/api/users/mypage",
+                                "/api/Baekjoon",
+                                "/api/Baekjoon/{problemId}",
                                 "/",
                                 "/home",
                                 "/signup",
                                 "/login",
                                 "/mypage",
+                                "/problems",
+                                "/problems/**",
                                 "/css/**", "/js/**", "/images/**", "/favicon.ico"
                         ).permitAll()
                         .anyRequest().authenticated()
@@ -47,4 +51,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }
