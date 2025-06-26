@@ -2,19 +2,66 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>문제 목록</title>
+  <title th:text="${problem == null ? '문제 목록' : problem.title}">문제</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="container">
+<div class="container">
+  <a href="/" class="menu-link">홈</a> |
+  <a href="/mypage" class="menu-link">마이페이지</a>
+  <hr/>
+
+  <!-- ▒▒ 목록 화면 ▒▒ -->
+  <div th:if="${problem == null}">
     <h1>스터디 문제 목록</h1>
-    <a href="/" class="menu-link">홈</a> |
-    <a href="/mypage" class="menu-link">마이페이지</a>
-    <hr>
-
-    <div id="problemListArea">로딩 중...</div>
-
-    <script th:src="@{/js/problems.js}"></script>
+    <table>
+      <thead>
+      <tr><th>ID</th><th>제목</th><th>알고리즘</th></tr>
+      </thead>
+      <tbody>
+      <tr th:each="p : ${problems}">
+        <td th:text="${p.baekjoonId}"></td>
+        <td>
+          <a th:href="@{/problems/{id}(id=${p.baekjoonId})}"
+             th:text="${p.title}"></a>
+        </td>
+        <td th:text="${p.algorithmCategory}"></td>
+      </tr>
+      </tbody>
+    </table>
   </div>
+
+  <!-- ▒▒ 상세 화면 ▒▒ -->
+  <div th:unless="${problem == null}">
+    <h1 th:text="${problem.title}">문제 제목</h1>
+
+    <p><strong>설명:</strong> <span th:text="${problem.description}"></span></p>
+    <p><strong>입력:</strong> <span th:text="${problem.inputDescription}"></span></p>
+    <p><strong>출력:</strong> <span th:text="${problem.outputDescription}"></span></p>
+
+    <hr/>
+
+    <h2>코드 제출</h2>
+    <form method="post" th:action="@{/api/submissions}">
+      <input type="hidden" name="baekjoonId"
+             th:value="${problem.baekjoonId}"/>
+
+      <label for="language">언어:</label>
+      <select id="language" name="language" required>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+      </select><br/><br/>
+
+      <label for="sourceCode">소스 코드:</label><br/>
+      <textarea id="sourceCode" name="sourceCode"
+                rows="10" cols="70" required></textarea><br/><br/>
+
+      <button type="submit">제출</button>
+      &nbsp;&nbsp;
+      <a th:href="@{/problems}">← 목록으로</a>
+    </form>
+  </div>
+</div>
 </body>
 </html>

@@ -23,6 +23,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/users/signup",
@@ -30,6 +31,7 @@ public class SecurityConfig {
                                 "/api/users/mypage",
                                 "/api/Baekjoon",
                                 "/api/Baekjoon/{problemId}",
+                                "/api/submissions",
                                 "/",
                                 "/home",
                                 "/signup",

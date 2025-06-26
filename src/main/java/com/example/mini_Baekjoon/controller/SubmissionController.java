@@ -6,21 +6,33 @@ import com.example.mini_Baekjoon.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+import java.security.Principal;
+
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/submissions")
 public class SubmissionController {
 
     private final SubmissionService submissionService;
 
-    /** 폼(WWW-FORM-URLENCODED) 전송 처리 */
-    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<Submission> submitByForm(SubmissionRequest dto) {
-        Submission saved = submissionService.saveSubmission(dto);
-        return ResponseEntity.ok(saved);   // 저장 내용(JSON) 반환
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> submit(@RequestBody SubmissionRequest dto,
+                                    Principal principal) {
+
+        String userId = principal.getName();
+
+        Submission saved = submissionService.saveSubmission(userId, dto);
+
+        return ResponseEntity.ok().body("{\"result\":\"correct\"}");
     }
 
-    /* 필요하면 JSON 전송(@RequestBody)용 메서드를 하나 더 둘 수 있습니다 */
+    @PostMapping
+    public String submitFromForm(SubmissionRequest dto, Principal principal) {
+        String userId = (principal != null) ? principal.getName() : "testUser";
+        submissionService.saveSubmission(userId, dto);
+        return "submission-success";
+    }
 }

@@ -11,16 +11,7 @@ public class ProblemSummaryDto {
         this.algorithmCategory = algorithmCategory;
     }
 
-    public int getBaekjoonId() {
-        return baekjoonId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getalgorithmCategory() {
-        return algorithmCategory;
-    }
+    public int getBaekjoonId() { return baekjoonId; }
+    public String getTitle() { return title; }
+    public String getAlgorithmCategory() { return algorithmCategory; }
 }
-
