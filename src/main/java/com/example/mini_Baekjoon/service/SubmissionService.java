@@ -34,7 +34,7 @@ public class SubmissionService {
                 .baekjoon(problem)
                 .language(dto.getLanguage())
                 .sourceCode(dto.getSourceCode())
-                .result("PENDING") // 채점 전 상태
+                .result("PENDING")
                 .submittedAt(LocalDateTime.now())
                 .build();
 
